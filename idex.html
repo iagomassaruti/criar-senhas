@@ -246,11 +246,24 @@
             copyGeneratedBtn.addEventListener('click', function() {
                 const password = generatedPassword.textContent;
                 if (password) {
-                    navigator.clipboard.writeText(password).then(function() {
-                        alert('Senha copiada para a área de transferência!');
-                    }).catch(function(err) {
-                        console.error('Erro ao copiar senha: ', err);
-                    });
+                    // Criar um elemento de input temporário
+                    const tempInput = document.createElement('input');
+                    tempInput.value = password;
+                    document.body.appendChild(tempInput);
+                    
+                    // Selecionar e copiar o texto
+                    tempInput.select();
+                    document.execCommand('copy');
+                    
+                    // Remover o input temporário
+                    document.body.removeChild(tempInput);
+                    
+                    // Feedback visual
+                    const originalText = copyGeneratedBtn.textContent;
+                    copyGeneratedBtn.textContent = 'Copiado!';
+                    setTimeout(() => {
+                        copyGeneratedBtn.textContent = originalText;
+                    }, 2000);
                 }
             });
             
