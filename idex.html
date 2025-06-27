@@ -78,6 +78,7 @@
             background-color: #f9f9f9;
             border: 1px dashed #ccc;
             border-radius: 4px;
+            margin-bottom: 10px;
         }
         
         .strength-meter {
@@ -242,30 +243,54 @@
                 evaluatePassword(password);
             });
             
-            // Copiar senha gerada
+            // Copiar senha gerada - MÉTODO 100% FUNCIONAL
             copyGeneratedBtn.addEventListener('click', function() {
                 const password = generatedPassword.textContent;
-                if (password) {
-                    // Criar um elemento de input temporário
-                    const tempInput = document.createElement('input');
-                    tempInput.value = password;
-                    document.body.appendChild(tempInput);
-                    
-                    // Selecionar e copiar o texto
-                    tempInput.select();
-                    document.execCommand('copy');
-                    
-                    // Remover o input temporário
-                    document.body.removeChild(tempInput);
-                    
-                    // Feedback visual
-                    const originalText = copyGeneratedBtn.textContent;
-                    copyGeneratedBtn.textContent = 'Copiado!';
-                    setTimeout(() => {
-                        copyGeneratedBtn.textContent = originalText;
-                    }, 2000);
+                if (!password) return;
+                
+                // Método moderno (recomendado)
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(password)
+                        .then(() => {
+                            showCopyFeedback();
+                        })
+                        .catch(err => {
+                            // Fallback para método antigo se o moderno falhar
+                            useOldCopyMethod(password);
+                        });
+                } else {
+                    // Método antigo para navegadores que não suportam clipboard API
+                    useOldCopyMethod(password);
                 }
             });
+            
+            function useOldCopyMethod(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';  // Evitar scrolling para o elemento
+                document.body.appendChild(textarea);
+                textarea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showCopyFeedback();
+                } catch (err) {
+                    alert('Não foi possível copiar a senha. Tente manualmente.');
+                }
+                
+                document.body.removeChild(textarea);
+            }
+            
+            function showCopyFeedback() {
+                const originalText = copyGeneratedBtn.textContent;
+                copyGeneratedBtn.textContent = 'Copiado!';
+                copyGeneratedBtn.style.backgroundColor = '#2ecc71';
+                
+                setTimeout(() => {
+                    copyGeneratedBtn.textContent = originalText;
+                    copyGeneratedBtn.style.backgroundColor = '#3498db';
+                }, 2000);
+            }
             
             // Avaliar senha digitada
             passwordToCheck.addEventListener('input', function() {
